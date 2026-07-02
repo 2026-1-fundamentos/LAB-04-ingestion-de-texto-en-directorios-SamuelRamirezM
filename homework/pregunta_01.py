@@ -71,3 +71,53 @@ def pregunta_01():
 
 
     """
+    import glob
+    import os
+    import pandas as pd
+
+    def load_input(input_directory):
+        files = glob.glob(f"{input_directory}/*/*")
+        dataframes = []
+    
+        for file in files:
+            target = os.path.basename(os.path.dirname(file))
+            
+            df_temp = pd.read_csv(
+                file,
+                header=None,
+                delimiter="\t",
+                names=["phrase"],
+                index_col=None,
+            )
+            
+            df_temp["target"] = target
+            
+            dataframes.append(df_temp)
+
+        dataframe = pd.concat(dataframes, ignore_index=True)
+
+        return dataframe
+    
+    def save_output(dataframe, output_directory, nombre):
+        os.makedirs(output_directory, exist_ok=True)
+
+        target_file = os.path.join(output_directory, nombre)
+
+        if os.path.exists(target_file):
+            os.remove(target_file)
+
+        dataframe.to_csv(
+            target_file,
+            sep=",",
+            index=False,
+        )
+
+    df_train = load_input("files/input/train")
+    df_test = load_input("files/input/test")
+
+    carpeta_destino = "files/output"
+
+    save_output(df_train, carpeta_destino, "train_dataset.csv")
+    save_output(df_test, carpeta_destino, "test_dataset.csv")
+
+pregunta_01()
